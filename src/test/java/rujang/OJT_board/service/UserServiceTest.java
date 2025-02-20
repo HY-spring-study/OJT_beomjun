@@ -72,4 +72,80 @@ class UserServiceTest {
         verify(userRepository, times(1)).existsByUsername(username);
         verify(userRepository, never()).save(any(User.class));
     }
+
+    @Test
+    //로그인 성공
+    void login_success() {
+        //given
+        String username = "testuser";
+        String password = "testpassword";
+
+        User user = User.builder()
+                .id(1L)
+                .username(username)
+                .password(password)
+                .build();
+
+        when(userRepository.findByUsername(username)).thenReturn(java.util.Optional.of(user));
+
+        //when
+        User result = userService.login(username, password);
+
+        //then
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals(username, result.getUsername());
+        assertEquals(password, result.getPassword());
+
+        verify(userRepository, times(1)).findByUsername(username);
+    }
+
+    @Test
+    //로그인 시 존재하지 않는 사용자 테스트
+    void login_fail_nonExistentUser() {
+        //given
+        String username = "testuser";
+        String password = "testpassword";
+
+        User user = User.builder()
+                .id(1L)
+                .username(username)
+                .password(password)
+                .build();
+
+        when(userRepository.findByUsername(username)).thenReturn(java.util.Optional.empty());
+
+        //when & then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.login(username, password);
+        });
+        assertEquals("존재하지 않는 사용자입니다.", exception.getMessage());
+
+        verify(userRepository, times(1)).findByUsername(username);
+    }
+
+    @Test
+    //로그인 시 잘못된 비밀번호 테스트
+    void login_fail_wrongPassword() {
+        //given
+        String username = "testuser";
+        String password = "testpassword";
+        String wrongPassword = "wrongpassword";
+
+        User user = User.builder()
+                .id(1L)
+                .username(username)
+                .password(password)
+                .build();
+
+        when(userRepository.findByUsername(username)).thenReturn(java.util.Optional.of(user));
+
+        //when & then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+           userService.login(username, wrongPassword);
+        });
+        assertEquals("비밀번호가 일치하지 않습니다.", exception.getMessage());
+
+        verify(userRepository, times(1)).findByUsername(username);
+    }
 }
