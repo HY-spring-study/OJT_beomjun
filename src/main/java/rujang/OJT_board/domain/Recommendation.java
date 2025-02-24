@@ -7,7 +7,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
 @Entity
 @Table(name = "recommendations", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"user_id", "post_id"})
