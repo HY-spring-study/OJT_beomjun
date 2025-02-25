@@ -47,9 +47,14 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Recommendation> recommendations;
 
-    // 업데이트 전용 메서드: 필요한 필드만 업데이트
+    //업데이트 전용 메서드 : 필요한 필드만 업데이트
     public void update(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    //작성자 할당 메서드 : 필요한 필드만 업데이트
+    public void assignUser(User user) {
+        this.user = user;
     }
 }
