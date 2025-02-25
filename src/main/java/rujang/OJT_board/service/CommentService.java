@@ -35,4 +35,21 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
+    /**
+     * 댓글 삭제 기능
+     * 삭제 요청 유저와 댓글 작성 유저가 일치하면 삭제
+     */
+    @Transactional
+    public void deleteComment(Long commentId, User user) {
+        //댓글 조회
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+        //삭제 권한 확인
+        if(!comment.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("삭제 권한이 없습니다.");
+        }
+
+        commentRepository.delete(comment);
+    }
+
 }

@@ -93,4 +93,78 @@ class CommentServiceTest {
         verify(postRepository, times(1)).findById(postId);
         verify(commentRepository, never()).save(any(Comment.class));
     }
+
+    //댓글 삭제 성공
+    @Test
+    void deleteComment_success() {
+        // given: 댓글 작성자와 삭제할 댓글 준비
+        User user = User.builder()
+                .id(1L)
+                .username("testuser")
+                .password("testpassword")
+                .build();
+        Comment comment = Comment.builder()
+                .id(1L)
+                .content("testcomment")
+                .user(user)
+                .build();
+        when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+
+        // when : 댓글 삭제 메서드 호출
+        commentService.deleteComment(1L, user);
+
+        // then : 댓글이 정상 삭제되었음을 확인
+        verify(commentRepository, times(1)).findById(1L);
+        verify(commentRepository, times(1)).delete(comment);
+    }
+
+    //댓글 삭제 시, 잘못된 사용자가 삭제 요청하는 경우 실패
+    @Test
+    void deleteComment_fail_wrongUser() {
+        //given: 댓글 작성자와 다른 사용자를 준비
+        User user = User.builder()
+                .id(1L)
+                .username("testuser")
+                .password("testpassword")
+                .build();
+        User wrongUser = User.builder()
+                .id(2L)
+                .username("wronguser")
+                .password("wrongpassword")
+                .build();
+        Comment comment = Comment.builder()
+                .id(1L)
+                .content("testcomment")
+                .user(user)
+                .build();
+        when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+
+        //when & then : 삭제 권한이 없는 사용자가 삭제 시도하면 예외 발생 확인
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            commentService.deleteComment(1L, wrongUser);
+        });
+        assertEquals("삭제 권한이 없습니다.", exception.getMessage());
+        verify(commentRepository, times(1)).findById(1L);
+        verify(commentRepository, never()).delete(any(Comment.class));
+    }
+
+    //댓글 삭제 시, 존재하지 않는 댓글이라면 실패
+    @Test
+    void deleteComment_fail_nonExistentComment() {
+        // given: 삭제할 댓글이 존재하지 않음을 설정
+        User user = User.builder()
+                .id(1L)
+                .username("testuser")
+                .password("password")
+                .build();
+        when(commentRepository.findById(1L)).thenReturn(Optional.empty());
+
+        //when & then: 존재하지 않는 댓글 삭제 요청 시 실패
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            commentService.deleteComment(1L, user);
+        });
+        assertEquals("존재하지 않는 댓글입니다.", exception.getMessage());
+        verify(commentRepository, times(1)).findById(1L);
+        verify(commentRepository, never()).delete(any(Comment.class));
+    }
 }
