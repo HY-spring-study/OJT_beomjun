@@ -2,10 +2,13 @@ package rujang.OJT_board.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import rujang.OJT_board.domain.Post;
 import rujang.OJT_board.domain.User;
 import rujang.OJT_board.dto.PostUpdateDTO;
 import rujang.OJT_board.repository.PostRepository;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,5 +48,18 @@ public class PostService {
         
         //게시글 삭제
         postRepository.delete(post);
+    }
+
+    //추천순으로 게시물 조회
+    @Transactional(readOnly = true)
+    public List<Post> getPostsOrderByRecommendation() {
+        return postRepository.findAllOrderByRecommendationCountDesc();
+    }
+
+    //생성시간을 기준으로 내림차순 정렬
+    @Transactional(readOnly = true)
+    public List<Post> findAllPostsOrderByCreatedAtDesc() {
+        //Spring Data JPA 네이밍 규칙 사용
+        return postRepository.findAllByOrderByCreatedAtDesc();
     }
 }
