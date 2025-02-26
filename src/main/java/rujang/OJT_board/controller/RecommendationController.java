@@ -23,6 +23,6 @@ public class RecommendationController {
         }
         //추천 토글 처리
         recommendationService.toggleRecommendation(postId, currentUser);
-        return "redirect:/";
+        return "redirect:/posts/" + postId;
     }
 }

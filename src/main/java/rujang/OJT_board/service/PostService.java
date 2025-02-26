@@ -62,4 +62,10 @@ public class PostService {
         //Spring Data JPA 네이밍 규칙 사용
         return postRepository.findAllByOrderByCreatedAtDesc();
     }
+
+    @Transactional(readOnly = true)
+    public Post getPostDetail(Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+    }
 }
